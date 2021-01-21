@@ -9,7 +9,9 @@ use Getopt::Long;
 use MIME::Base64 qw(encode_base64);
 
 # CONFIGURATION
-use constant PANDOC => 'C:\Users\denis.beurive\AppData\Local\Pandoc\pandoc.exe';
+# use constant PANDOC => 'C:\Users\denis.beurive\AppData\Local\Pandoc\pandoc.exe';
+use constant PANDOC => 'C:\Users\denis\AppData\Local\Pandoc\pandoc.exe';
+
 use constant CSS => 'pandoc.css';
 
 use constant KEY_BASENAME => 'basename';
