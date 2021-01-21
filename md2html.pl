@@ -125,6 +125,13 @@ sub convert_md_links {
     close($fd)
 }
 
+# Sanity checks.
+
+if (! -d &PANDOC) {
+    printf("ERROR: the pandoc executable \"%s\" cannot be found! Please configure the constant \"PANDOC\".\n", &PANDOC);
+    exit(1);
+}
+
 # -----------------------------------------------------------------------
 # Parse the command line.
 # -----------------------------------------------------------------------
@@ -187,6 +194,21 @@ foreach my $file (@md_files) {
     make_path($target_dir) unless(-d $target_dir);
     unlink($target_file) if (-e $target_file);
     printf("- ${md_file} -> ${target_file}\n") if ($cli_verbose);
+    my @cmd = (
+        &PANDOC,
+        $md_file,
+        '-f',
+        'markdown',
+        '-t',
+        'html',
+        '--quiet',
+        '--include-in-header',
+        $PANDOC_CSS,
+        '-s',
+        '-o',
+        $target_file
+    );
+    printf("Exec: %s\n", join(' ', @cmd)) if ($cli_verbose);
 
     system(
         &PANDOC,
