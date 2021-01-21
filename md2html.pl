@@ -129,7 +129,7 @@ sub convert_md_links {
 
 # Sanity checks.
 
-if (! -d &PANDOC) {
+if (! -e &PANDOC) {
     printf("ERROR: the pandoc executable \"%s\" cannot be found! Please configure the constant \"PANDOC\".\n", &PANDOC);
     exit(1);
 }
