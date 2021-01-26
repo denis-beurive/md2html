@@ -10,7 +10,9 @@ use MIME::Base64 qw(encode_base64);
 
 # CONFIGURATION
 # use constant PANDOC => 'C:\Users\denis.beurive\AppData\Local\Pandoc\pandoc.exe';
-use constant PANDOC => 'C:\Users\denis\AppData\Local\Pandoc\pandoc.exe';
+# use constant PANDOC => 'C:\Users\denis\AppData\Local\Pandoc\pandoc.exe';
+use constant PANDOC => '/usr/bin/pandoc';
+
 
 use constant CSS => 'pandoc.css';
 
@@ -203,7 +205,7 @@ foreach my $file (@md_files) {
         'markdown',
         '-t',
         'html',
-        '--quiet',
+#        '--quiet',
         '--include-in-header',
         $PANDOC_CSS,
         '-s',
@@ -212,20 +214,7 @@ foreach my $file (@md_files) {
     );
     printf("Exec: %s\n", join(' ', @cmd)) if ($cli_verbose);
 
-    system(
-        &PANDOC,
-        $md_file,
-        '-f',
-        'markdown',
-        '-t',
-        'html',
-        '--quiet',
-        '--include-in-header',
-        $PANDOC_CSS,
-        '-s',
-        '-o',
-        $target_file
-    );
+    system(@cmd);
 
     convert_md_links($target_file)
 }
