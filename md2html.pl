@@ -21,7 +21,7 @@ use constant KEY_ABSOLUTE_PATH => 'absolute path';
 use constant KEY_ABSOLUTE_DIR => 'absolute dir';
 
 my $__DIR__ = File::Spec->rel2abs(dirname(__FILE__));
-my $PANDOC_CSS = File::Spec->catfile($__DIR__, 'pandoc.css');
+my $PANDOC_CSS = File::Spec->catfile($__DIR__, CSS);
 my $cli_root_path = $__DIR__;
 my $cli_target_path = $__DIR__;
 my $cli_verbose = 0;
