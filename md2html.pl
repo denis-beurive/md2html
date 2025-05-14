@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use warnings FATAL => 'all';
+use Cwd qw/abs_path getcwd/;
 use File::Find;
 use File::Spec;
 use File::Basename;
@@ -9,9 +10,9 @@ use Getopt::Long;
 use MIME::Base64 qw(encode_base64);
 
 # CONFIGURATION
-# use constant PANDOC => 'C:\Users\denis.beurive\AppData\Local\Pandoc\pandoc.exe';
+use constant PANDOC => 'C:\Users\denis.beurive\AppData\Local\Pandoc\pandoc.exe';
 # use constant PANDOC => 'C:\Users\denis\AppData\Local\Pandoc\pandoc.exe';
-use constant PANDOC => '/usr/bin/pandoc';
+# use constant PANDOC => '/usr/bin/pandoc';
 
 
 use constant CSS => 'pandoc.css';
@@ -83,6 +84,7 @@ sub image2base64 {
 sub embedHtml {
     my ($in_html_doc_path, $in_root_dir_path) = @_;
 
+    my $dir = getcwd();
     open(my $fd, '<', $in_html_doc_path)
         or die(sprintf('Cannot open file "%s" (%s): %s', $in_html_doc_path, $in_root_dir_path, $!));
     my @lines = <$fd>;
@@ -90,20 +92,19 @@ sub embedHtml {
 
     foreach my $line (@lines) {
         if ($line =~ m/<img src="([^"]+)"/) {
+            chdir($in_root_dir_path) or die(sprintf("Invalid root directory (%s)", $in_root_dir_path));
             my $local_image_path = $1;
+            my $absolute_image_path = abs_path($local_image_path);
+            chdir($dir) or die(sprintf("Invalid directory (%s)", $dir));
             my $extension_pos = rindex($local_image_path, ".");
 
             (-1 != $extension_pos) or die(sprintf('Invalid image file name "%s" (no extension)', $local_image_path));
             my $extension = substr($local_image_path, $extension_pos+1);
-            # Example:
-            #   $in_html_doc_path: C:\Users\denis\CLionProjects\openssl\doc\clion.html
-            #   $in_root_dir_path: C:\Users\denis\CLionProjects\openssl
-            #   $rel_dir:          doc
-            my $rel_dir = dirname(File::Spec->abs2rel($in_html_doc_path, $in_root_dir_path));
-            my $image = File::Spec->catfile($in_root_dir_path, $rel_dir, $local_image_path);
 
-            printf("  Convert \"%s\" (%s) into base64\n", $local_image_path, $image) if ($cli_verbose);
-            my $text = "data:image/${extension};base64," . image2base64($image);
+            printf("  Local image path: \"%s\"\n", $local_image_path) if ($cli_verbose);
+            printf("  Absolute image path: \"%s\"\n", $absolute_image_path) if ($cli_verbose);
+            printf("  Convert \"%s\" (%s) into base64\n", $local_image_path, $absolute_image_path) if ($cli_verbose);
+            my $text = "data:image/${extension};base64," . image2base64($absolute_image_path);
             $line =~ s/<img src="([^"]+)"/<img src="${text}"/;
         }
     }
@@ -227,7 +228,7 @@ print("\n") if ($cli_verbose);
 print("Embed images in HTML files:\n") if ($cli_verbose);
 foreach my $file (@html_files) {
     if ($cli_verbose) {
-        printf("- %s\n", $file);
+        printf("- %s [root path: %s]\n", $file, $cli_root_path);
     }
     my $html = embedHtml($file, $cli_root_path);
     open(my $fd, '>', $file)
